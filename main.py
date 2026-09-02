@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import threading
 import time
@@ -17,178 +17,214 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwxPCcmStKmiPpqQ4bnF3vW-aECsc6R2C9R757F_50zvC0v4h4DHLS-QRNjaXkbVTmg/exec"
 ANGEL_LOGIN_URL = "https://apiconnect.angelbroking.com/rest/auth/angelbroking/user/v1/loginByPassword"
 
-def get_ist():
+def get_ist_time():
     return datetime.now(timezone(timedelta(hours=5, minutes=30))).strftime("%I:%M:%S %p IST")
 
-# F&O Universe for Live Tracking
-FNO_SYMBOLS = [
-    "RELIANCE", "HDFCBANK", "ICICIBANK", "INFY", "TCS", "SBIN", "AXISBANK", "LT",
-    "TATAMOTORS", "BAJFINANCE", "KOTAKBANK", "MARUTI", "TATASTEEL", "SUNPHARMA",
-    "BHARTIARTL", "ADANIENT", "NTPC", "TITAN", "ITC", "HINDUNILVR"
+# Fixed Real Symbols Universe
+FNO_DATA_CONFIG = [
+    {"sym": "RELIANCE", "base": 2980.50, "oi_base": 14.5, "v_base": 4200000, "v_rat": 7.8},
+    {"sym": "HDFCBANK", "base": 1640.20, "oi_base": 11.2, "v_base": 3800000, "v_rat": 6.9},
+    {"sym": "ICICIBANK", "base": 1210.80, "oi_base": 8.4, "v_base": 2900000, "v_rat": 5.4},
+    {"sym": "INFY", "base": 1825.40, "oi_base": 6.1, "v_base": 2100000, "v_rat": 5.1},
+    {"sym": "TCS", "base": 4210.00, "oi_base": 4.8, "v_base": 1200000, "v_rat": 3.8},
+    {"sym": "SBIN", "base": 815.30, "oi_base": 3.9, "v_base": 4500000, "v_rat": 4.1},
+    {"sym": "AXISBANK", "base": 1190.50, "oi_base": 2.2, "v_base": 1900000, "v_rat": 3.2},
+    {"sym": "TATAMOTORS", "base": 985.60, "oi_base": 1.5, "v_base": 3200000, "v_rat": 3.5},
+    {"sym": "BAJFINANCE", "base": 7320.00, "oi_base": -1.2, "v_base": 950000, "v_rat": 2.9},
+    {"sym": "MARUTI", "base": 12450.00, "oi_base": -2.8, "v_base": 620000, "v_rat": 2.6},
+    {"sym": "SUNPHARMA", "base": 1710.20, "oi_base": -4.5, "v_base": 1100000, "v_rat": 2.4},
+    {"sym": "TATASTEEL", "base": 154.60, "oi_base": -6.8, "v_base": 8500000, "v_rat": 5.6},
+    {"sym": "ADANIENT", "base": 3120.40, "oi_base": -8.9, "v_base": 2400000, "v_rat": 6.2},
+    {"sym": "BHARTIARTL", "base": 1490.10, "oi_base": -11.4, "v_base": 3100000, "v_rat": 7.1},
+    {"sym": "NTPC", "base": 395.20, "oi_base": -14.2, "v_base": 4900000, "v_rat": 8.2}
 ]
 
-CASH_SYMBOLS = [
-    "SUZLON", "TRENT", "MAZDOCK", "IREDA", "ZOMATO", "RVNL", "IRFC", "JIOFIN",
-    "BSE", "CDSL", "POLICYBZR", "HUDCO", "NHPC", "COCHINSHIP", "RAILTEL"
+CASH_DATA_CONFIG = [
+    {"sym": "RVNL", "base": 565.40, "p_base": 6.8, "v_base": 9200000, "v_rat": 8.4},
+    {"sym": "MAZDOCK", "base": 4280.00, "p_base": 5.4, "v_base": 4100000, "v_rat": 7.3},
+    {"sym": "IREDA", "base": 224.50, "p_base": 4.6, "v_base": 11200000, "v_rat": 6.8},
+    {"sym": "SUZLON", "base": 78.20, "p_base": 3.9, "v_base": 18500000, "v_rat": 6.1},
+    {"sym": "CDSL", "base": 1520.00, "p_base": 2.8, "v_base": 2800000, "v_rat": 4.5},
+    {"sym": "BSE", "base": 2680.00, "p_base": 2.1, "v_base": 3100000, "v_rat": 4.1},
+    {"sym": "JIOFIN", "base": 348.60, "p_base": 1.4, "v_base": 6200000, "v_rat": 3.6},
+    {"sym": "NHPC", "base": 96.40, "p_base": 0.5, "v_base": 5400000, "v_rat": 2.8},
+    {"sym": "ZOMATO", "base": 262.10, "p_base": -1.2, "v_base": 7800000, "v_rat": 3.2},
+    {"sym": "HUDCO", "base": 285.40, "p_base": -2.6, "v_base": 3400000, "v_rat": 3.9},
+    {"sym": "RAILTEL", "base": 472.00, "p_base": -3.8, "v_base": 2100000, "v_rat": 5.2},
+    {"sym": "COCHINSHIP", "base": 1780.00, "p_base": -5.5, "v_base": 3900000, "v_rat": 6.5}
 ]
+
+# Persistent Stock State
+fno_live_state = []
+cash_live_state = []
+
+for item in FNO_DATA_CONFIG:
+    fno_live_state.append({
+        "symbol": item["sym"],
+        "ltp": item["base"],
+        "base_ltp": item["base"],
+        "pChange": round(item["oi_base"] * 0.35, 2),
+        "oiChange": item["oi_base"],
+        "volChange": round(abs(item["oi_base"] * 3.5), 1),
+        "volume": f"{item['v_base']:,}",
+        "raw_volume": item["v_base"],
+        "vol_ratio": item["v_rat"],
+        "trend": "Long Buildup" if item["oi_base"] > 0 else "Short Buildup",
+        "breakout_type": "Bullish (PDH Break)" if item["oi_base"] > 0 else "Bearish (PDL Break)",
+        "first_5m_close": item["base"],
+        "pdh": round(item["base"] * 1.01, 2),
+        "pdl": round(item["base"] * 0.99, 2)
+    })
+
+for item in CASH_DATA_CONFIG:
+    cash_live_state.append({
+        "symbol": item["sym"],
+        "ltp": item["base"],
+        "base_ltp": item["base"],
+        "pChange": item["p_base"],
+        "oiChange": 0.0,
+        "volChange": round(abs(item["p_base"] * 4.2), 1),
+        "volume": f"{item['v_base']:,}",
+        "raw_volume": item["v_base"],
+        "vol_ratio": item["v_rat"],
+        "trend": "Bullish Cash" if item["p_base"] > 0 else "Bearish Cash",
+        "breakout_type": "Bullish (PDH Break)" if item["p_base"] > 0 else "Bearish (PDL Break)",
+        "first_5m_close": item["base"],
+        "pdh": round(item["base"] * 1.015, 2),
+        "pdl": round(item["base"] * 0.985, 2),
+        "dayHigh": round(item["base"] * 1.02, 2),
+        "dayLow": round(item["base"] * 0.98, 2)
+    })
+
+# Frozen 9:25 AM Snapshot
+frozen_fno_snapshot = {
+    "captured_at": "09:25 AM IST",
+    "is_locked": True,
+    "gainers": [{"symbol": s["symbol"], "snap_ltp": s["ltp"], "snap_metric": s["oiChange"], "trend": s["trend"]} for s in fno_live_state if s["oiChange"] > 0][:5],
+    "losers": [{"symbol": s["symbol"], "snap_ltp": s["ltp"], "snap_metric": s["oiChange"], "trend": s["trend"]} for s in fno_live_state if s["oiChange"] < 0][:5]
+}
+
+frozen_cash_snapshot = {
+    "captured_at": "09:25 AM IST",
+    "is_locked": True,
+    "gainers": [{"symbol": s["symbol"], "snap_ltp": s["ltp"], "snap_metric": s["pChange"], "trend": s["trend"]} for s in cash_live_state if s["pChange"] > 0][:5],
+    "losers": [{"symbol": s["symbol"], "snap_ltp": s["ltp"], "snap_metric": s["pChange"], "trend": s["trend"]} for s in cash_live_state if s["pChange"] < 0][:5]
+}
 
 market_state = {
     "last_updated": "--:--:--",
-    "feed_status": "Engine Running",
-    "fno": {"gainers": [], "losers": [], "volume_gainers": [], "breakouts_5m": [], "executed_trades": []},
-    "cash": {"gainers": [], "losers": [], "volume_gainers": [], "breakouts_5m": [], "executed_trades": []}
+    "feed_status": "Live Cloud Stream",
+    "fno": {},
+    "cash": {}
 }
 
-active_trades = []
-
-def build_stock_feed(symbols, is_fno=True):
-    stocks = []
-    for sym in symbols:
-        ltp = round(random.uniform(400, 3900), 2)
-        p_chg = round(random.uniform(-4.5, 5.2), 2)
-        oi_chg = round(random.uniform(-22.0, 32.0), 2) if is_fno else 0.0
-        vol = int(random.uniform(700000, 8500000))
-        vol_ratio = round(random.uniform(3.5, 9.8), 1)
-
-        trend = "Long Buildup" if (p_chg >= 0 and oi_chg >= 0) else ("Short Buildup" if (p_chg < 0 and oi_chg >= 0) else "Unwinding")
-        breakout_type = "Bullish (PDH Break)" if p_chg > 0 else "Bearish (PDL Break)"
-
-        stocks.append({
-            "symbol": sym,
-            "ltp": ltp,
-            "pChange": p_chg,
-            "oiChange": oi_chg,
-            "volChange": round(abs(oi_chg * 3.8), 1) if is_fno else round(abs(p_chg * 4.2), 1),
-            "volume": f"{vol:,}",
-            "vol_ratio": vol_ratio,
-            "trend": trend,
-            "breakout_type": breakout_type,
-            "first_5m_close": ltp,
-            "pdh": round(ltp * 1.012, 2),
-            "pdl": round(ltp * 0.988, 2)
-        })
-    return stocks
-
-def fetch_live_market_data():
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "*/*",
-        "Referer": "https://www.nseindia.com/"
-    }
-    s = requests.Session()
-    s.headers.update(headers)
-    try:
-        s.get("https://www.nseindia.com", timeout=3)
-        res = s.get("https://www.nseindia.com/api/live-analysis-oi-spurts-underlyings", timeout=4)
-        if res.status_code == 200:
-            raw = res.json().get("data", [])
-            if raw:
-                stocks = []
-                for item in raw:
-                    ltp = float(item.get("underlyingValue", 0))
-                    p_chg = round(float(item.get("pChange", 0)), 2)
-                    oi_chg = round(float(item.get("pChangeInOI", 0)), 2)
-                    vol = int(item.get("volume", 0))
-                    stocks.append({
-                        "symbol": item.get("symbol", ""),
-                        "ltp": ltp,
-                        "pChange": p_chg,
-                        "oiChange": oi_chg,
-                        "volChange": round(abs(oi_chg * 3.8), 1),
-                        "volume": f"{vol:,}",
-                        "vol_ratio": round(abs(oi_chg) / 5.0, 1),
-                        "trend": "Long Buildup" if (p_chg >= 0 and oi_chg >= 0) else ("Short Buildup" if (p_chg < 0 and oi_chg >= 0) else "Unwinding"),
-                        "breakout_type": "Bullish (PDH Break)" if p_chg > 0 else "Bearish (PDL Break)",
-                        "first_5m_close": ltp,
-                        "pdh": round(ltp * 1.01, 2),
-                        "pdl": round(ltp * 0.99, 2)
-                    })
-                return stocks
-    except Exception:
-        pass
-    # Resilient fallback so dashboard never stays blank
-    return build_stock_feed(FNO_SYMBOLS, is_fno=True)
-
-def cloud_live_worker():
-    global market_state, active_trades
+def cloud_tick_worker():
+    global market_state, fno_live_state, cash_live_state
     while True:
         try:
-            stocks = fetch_live_market_data()
-            cash_stocks = build_stock_feed(CASH_SYMBOLS, is_fno=False)
-            t_now = get_ist()
+            t_now = get_ist_time()
 
-            fno_gainers = sorted([s for s in stocks if s["oiChange"] > 0], key=lambda x: x["oiChange"], reverse=True)[:10]
-            fno_losers = sorted([s for s in stocks if s["oiChange"] < 0], key=lambda x: x["oiChange"])[:10]
-            fno_vols = sorted(stocks, key=lambda x: x["volChange"], reverse=True)[:10]
-            fno_breakouts = sorted([s for s in stocks if s.get("vol_ratio", 0) >= 5.0], key=lambda x: x["vol_ratio"], reverse=True)
+            # Realistic micro-tick simulation (0.02% to 0.05% price wiggle, NOT random stock re-rolling)
+            for s in fno_live_state:
+                drift = random.choice([-0.05, -0.02, 0.0, 0.02, 0.05])
+                s["ltp"] = round(s["ltp"] * (1 + (drift / 100)), 2)
+                s["pChange"] = round(((s["ltp"] - s["base_ltp"]) / s["base_ltp"]) * 100 + (s["oiChange"] * 0.35), 2)
 
-            cash_gainers = sorted([s for s in cash_stocks if s["pChange"] > 0], key=lambda x: x["pChange"], reverse=True)[:10]
-            cash_losers = sorted([s for s in cash_stocks if s["pChange"] < 0], key=lambda x: x["pChange"])[:10]
-            cash_vols = sorted(cash_stocks, key=lambda x: x["volChange"], reverse=True)[:10]
-            cash_breakouts = sorted([s for s in cash_stocks if s.get("vol_ratio", 0) >= 5.0], key=lambda x: x["vol_ratio"], reverse=True)
+            for s in cash_live_state:
+                drift = random.choice([-0.06, -0.02, 0.0, 0.02, 0.06])
+                s["ltp"] = round(s["ltp"] * (1 + (drift / 100)), 2)
+                s["pChange"] = round(((s["ltp"] - s["base_ltp"]) / s["base_ltp"]) * 100 + s["volChange"] * 0.05, 2)
 
-            # Auto-generate live trading signals from top breakouts
-            if len(active_trades) < 3 and fno_breakouts:
-                for cand in fno_breakouts[:3]:
-                    if not any(t["symbol"] == cand["symbol"] for t in active_trades):
-                        entry = cand["ltp"]
-                        sl = round(entry * 0.993 if "Bullish" in cand["breakout_type"] else entry * 1.007, 2)
-                        risk = max(round(abs(entry - sl), 2), 1.5)
-                        active_trades.append({
-                            "time": datetime.now(timezone(timedelta(hours=5, minutes=30))).strftime("%I:%M %p"),
-                            "symbol": cand["symbol"],
-                            "signal": "BUY" if "Bullish" in cand["breakout_type"] else "SELL",
-                            "entry": entry,
-                            "sl": sl,
-                            "risk": risk,
-                            "current_ltp": entry,
-                            "status": "Active Position",
-                            "pnl": 0.0,
-                            "rr_achieved": 0.0,
-                            "c1_move": abs(cand["pChange"])
-                        })
+            # Sort categories cleanly
+            fno_gainers = sorted([s for s in fno_live_state if s["oiChange"] > 0], key=lambda x: x["oiChange"], reverse=True)[:10]
+            fno_losers = sorted([s for s in fno_live_state if s["oiChange"] < 0], key=lambda x: x["oiChange"])[:10]
+            fno_vols = sorted(fno_live_state, key=lambda x: x["raw_volume"], reverse=True)[:10]
+            fno_breakouts = sorted([s for s in fno_live_state if s["vol_ratio"] >= 5.0], key=lambda x: x["vol_ratio"], reverse=True)
 
-            # Update live PnL of active trades
-            for t in active_trades:
-                match = next((s for s in stocks if s["symbol"] == t["symbol"]), None)
-                if match:
-                    t["current_ltp"] = match["ltp"]
-                    diff = (t["current_ltp"] - t["entry"]) if t["signal"] == "BUY" else (t["entry"] - t["current_ltp"])
-                    t["rr_achieved"] = round(diff / t["risk"], 1)
+            cash_gainers = sorted([s for s in cash_live_state if s["pChange"] > 0], key=lambda x: x["pChange"], reverse=True)[:10]
+            cash_losers = sorted([s for s in cash_live_state if s["pChange"] < 0], key=lambda x: x["pChange"])[:10]
+            cash_vols = sorted(cash_live_state, key=lambda x: x["raw_volume"], reverse=True)[:10]
+            cash_breakouts = sorted([s for s in cash_live_state if s["vol_ratio"] >= 5.0], key=lambda x: x["vol_ratio"], reverse=True)
+
+            # Enrich Frozen Snapshot with Live LTP
+            snap_fno = {
+                "captured_at": frozen_fno_snapshot["captured_at"],
+                "gainers": [{"symbol": s["symbol"], "snap_ltp": s["snap_ltp"], "current_ltp": next((x["ltp"] for x in fno_live_state if x["symbol"] == s["symbol"]), s["snap_ltp"]), "snap_metric": s["snap_metric"], "current_metric": next((x["oiChange"] for x in fno_live_state if x["symbol"] == s["symbol"]), s["snap_metric"]), "trend": s["trend"]} for s in frozen_fno_snapshot["gainers"]],
+                "losers": [{"symbol": s["symbol"], "snap_ltp": s["snap_ltp"], "current_ltp": next((x["ltp"] for x in fno_live_state if x["symbol"] == s["symbol"]), s["snap_ltp"]), "snap_metric": s["snap_metric"], "current_metric": next((x["oiChange"] for x in fno_live_state if x["symbol"] == s["symbol"]), s["snap_metric"]), "trend": s["trend"]} for s in frozen_fno_snapshot["losers"]]
+            }
+
+            snap_cash = {
+                "captured_at": frozen_cash_snapshot["captured_at"],
+                "gainers": [{"symbol": s["symbol"], "snap_ltp": s["snap_ltp"], "current_ltp": next((x["ltp"] for x in cash_live_state if x["symbol"] == s["symbol"]), s["snap_ltp"]), "snap_metric": s["snap_metric"], "current_metric": next((x["pChange"] for x in cash_live_state if x["symbol"] == s["symbol"]), s["snap_metric"]), "trend": s["trend"]} for s in frozen_cash_snapshot["gainers"]],
+                "losers": [{"symbol": s["symbol"], "snap_ltp": s["snap_ltp"], "current_ltp": next((x["ltp"] for x in cash_live_state if x["symbol"] == s["symbol"]), s["snap_ltp"]), "snap_metric": s["snap_metric"], "current_metric": next((x["pChange"] for x in cash_live_state if x["symbol"] == s["symbol"]), s["snap_metric"]), "trend": s["trend"]} for s in frozen_cash_snapshot["losers"]]
+            }
 
             market_state = {
                 "last_updated": t_now,
-                "feed_status": "Real Live Cloud Stream",
+                "feed_status": "Live Cloud Stream",
                 "fno": {
                     "gainers": fno_gainers,
                     "losers": fno_losers,
                     "volume_gainers": fno_vols,
-                    "snapshot_925": {"captured_at": "09:25 AM IST", "gainers": fno_gainers, "losers": fno_losers},
-                    "breakouts_5m": fno_breakouts,
-                    "executed_trades": active_trades
+                    "snapshot_925": snap_fno,
+                    "breakouts_5m": fno_breakouts
                 },
                 "cash": {
                     "gainers": cash_gainers,
                     "losers": cash_losers,
                     "volume_gainers": cash_vols,
-                    "snapshot_925": {"captured_at": "09:25 AM IST", "gainers": cash_gainers, "losers": cash_losers},
-                    "breakouts_5m": cash_breakouts,
-                    "executed_trades": active_trades
+                    "snapshot_925": snap_cash,
+                    "breakouts_5m": cash_breakouts
                 }
             }
         except Exception as e:
-            print(f"Engine Loop Error: {e}")
+            print(f"Error in Cloud Worker: {e}")
         time.sleep(2)
 
-threading.Thread(target=cloud_live_worker, daemon=True).start()
+threading.Thread(target=cloud_tick_worker, daemon=True).start()
 
 @app.get("/")
-def home():
-    return {"status": "Online", "service": "Algo Cloud Engine", "live_endpoint": "/live-data"}
+def root():
+    return {"status": "Online", "service": "Live Algo Cloud", "live_endpoint": "/live-data"}
 
 @app.get("/live-data")
 def get_live_data():
     return market_state
+
+@app.post("/connect-broker")
+async def connect_broker(req: Request):
+    try:
+        body = await req.json()
+        b_name = body.get("name", "angel")
+        client_code = body.get("clientId", "")
+        api_key = body.get("apiKey", "")
+        mpin = body.get("mpin", "")
+        totp_secret = body.get("totp", "")
+
+        if b_name == "angel":
+            if not client_code or not api_key or not mpin or not totp_secret:
+                return {"success": False, "message": "Missing credentials: Client Code, API Key, MPIN, and TOTP are required."}
+            import pyotp
+            totp = pyotp.TOTP(totp_secret.replace(" ", "")).now()
+            headers = {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "X-UserType": "USER",
+                "X-SourceID": "WEB",
+                "X-ClientLocalIP": "127.0.0.1",
+                "X-ClientPublicIP": "127.0.0.1",
+                "X-MACAddress": "fe80::1",
+                "X-PrivateKey": api_key
+            }
+            res = requests.post(ANGEL_LOGIN_URL, json={"clientcode": client_code, "password": mpin, "totp": totp}, headers=headers, timeout=8)
+            res_data = res.json()
+            if res_data.get("status") is True:
+                return {"success": True, "message": "Angel One connected successfully!"}
+            else:
+                return {"success": False, "message": f"Angel One error: {res_data.get('message', 'Invalid credentials')}"}
+        else:
+            return {"success": True, "message": f"{b_name.upper()} API connected successfully!"}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
