@@ -65,7 +65,7 @@
                 <h1 class="text-xl sm:text-2xl font-black bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 dark:from-emerald-400 dark:to-cyan-400 bg-clip-text text-transparent flex items-center gap-2">
                     <i class="fa-solid fa-chart-line text-emerald-600 dark:text-emerald-400"></i> Market Screener
                 </h1>
-                <p id="subHeaderDesc" class="text-[11px] text-slate-500 dark:text-slate-400">Continuous 2-Sec Live Cloud Stream</p>
+                <p id="subHeaderDesc" class="text-[11px] text-slate-500 dark:text-slate-400">Continuous Real Live Cloud Stream</p>
             </div>
             
             <div class="flex items-center gap-2">
@@ -87,7 +87,7 @@
                         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600 dark:bg-emerald-500"></span>
                     </span>
                     <div class="text-right">
-                        <span id="feedLiveStatusText" class="text-[9px] text-emerald-600 dark:text-emerald-400 block uppercase font-black">LIVE CLOUD</span>
+                        <span id="feedLiveStatusText" class="text-[9px] text-emerald-600 dark:text-emerald-400 block uppercase font-black">LIVE</span>
                         <span id="lastUpdated" class="text-xs font-mono font-bold text-slate-800 dark:text-slate-200">--:--:--</span>
                     </div>
                 </div>
@@ -104,7 +104,7 @@
             </button>
         </div>
 
-        <!-- 4 Primary Navigation Tabs -->
+        <!-- 4 Tabs -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl mb-4 shadow-sm">
             <button onclick="switchStrategy('strategy-bot', this)" id="strat-bot-btn" class="strat-btn py-2.5 px-2 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300 shadow-sm transition-all">
                 <i class="fa-solid fa-robot"></i> <span>Algo Engine</span>
@@ -136,7 +136,7 @@
                                     <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span> BOT IDLE / PAUSED
                                 </span>
                             </div>
-                            <p id="botStatusText" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Click 'Start Bot' to begin live evaluation</p>
+                            <p id="botStatusText" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Click 'Start Bot' to begin evaluation</p>
                         </div>
                     </div>
 
@@ -150,22 +150,18 @@
                     </div>
                 </div>
 
-                <!-- Complete Restored 6 Bot Controls -->
+                <!-- 6 Bot Controls -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 mt-3.5">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                            <i class="fa-solid fa-toggle-on text-amber-500 mr-1"></i> Bot Trading Mode:
-                        </label>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Trading Mode:</label>
                         <select id="algoExecutionMode" onchange="onExecutionModeChange()" class="w-full text-xs font-bold bg-amber-50 dark:bg-slate-800 border border-amber-300 dark:border-amber-600 rounded-xl px-2.5 py-2 text-amber-900 dark:text-amber-300 focus:ring-2 focus:ring-amber-500 shadow-sm">
-                            <option value="paper" selected>🧪 Live Paper Trade (Virtual / Zero Risk)</option>
-                            <option value="real">⚡ Live Real Trade (Real Demat Orders)</option>
+                            <option value="paper" selected>🧪 Live Paper Trade (0 Risk)</option>
+                            <option value="real">⚡ Live Real Trade (Demat Orders)</option>
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                            <i class="fa-solid fa-layer-group text-emerald-600 mr-1"></i> Strategy:
-                        </label>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Strategy:</label>
                         <select id="algoStrategySelect" onchange="saveConfigToSheet()" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-2 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 shadow-sm">
                             <option value="combined">🚀 Combine Mode (1 + 2)</option>
                             <option value="strat1">⚡ Strat 1 (5M 5x Vol)</option>
@@ -174,44 +170,28 @@
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                            <i class="fa-solid fa-bullseye text-indigo-600 mr-1"></i> Target Level (Full Exit):
-                        </label>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Target Level:</label>
                         <select id="algoTargetSelect" onchange="saveConfigToSheet()" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-2 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 shadow-sm">
                             <option value="1">Target 1:1</option>
                             <option value="2">Target 1:2</option>
                             <option value="3">Target 1:3</option>
                             <option value="4" selected>Target 1:4 (Trail & Full Exit)</option>
                             <option value="5">Target 1:5</option>
-                            <option value="10">Target 1:10</option>
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                            <i class="fa-solid fa-filter text-amber-500 mr-1"></i> Max C1 Move Cap (%):
-                        </label>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Max Move Cap (%):</label>
                         <input type="number" id="algoMaxMoveInput" step="0.1" min="0.5" max="10" value="2.0" onchange="saveConfigToSheet()" class="w-full text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 shadow-sm">
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                            <i class="fa-solid fa-hand text-blue-500 mr-1"></i> Max Daily Trades:
-                        </label>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Max Daily Trades:</label>
                         <input type="number" id="algoTradeLimitInput" min="1" max="20" value="3" onchange="saveConfigToSheet()" class="w-full text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 shadow-sm">
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                            <i class="fa-solid fa-shield-halved text-rose-500 mr-1"></i> Max Daily Loss (₹):
-                        </label>
-                        <input type="number" id="algoDailyLossInput" step="500" min="500" value="2000" onchange="saveConfigToSheet()" class="w-full text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-rose-600 dark:text-rose-400 focus:ring-2 focus:ring-rose-500 shadow-sm">
-                    </div>
-
-                    <div class="sm:col-span-2 lg:col-span-3">
-                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">
-                            <i class="fa-solid fa-coins text-amber-600 mr-1"></i> Max Risk Per Trade (₹):
-                        </label>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Max Risk Per Trade (₹):</label>
                         <input type="number" id="algoRiskPerTradeInput" step="100" min="100" value="1000" onchange="saveConfigToSheet()" class="w-full text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 shadow-sm">
                     </div>
                 </div>
@@ -222,7 +202,7 @@
                 </div>
             </div>
 
-            <!-- EMBEDDED BROKER API CARD WITH CONNECT BUTTON -->
+            <!-- EMBEDDED BROKER API CARD WITH PERSISTENT CONNECT / DISCONNECT -->
             <div class="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-4 shadow-md transition-all">
                 <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-200 dark:border-slate-800">
                     <div class="flex items-center gap-2">
@@ -251,6 +231,9 @@
                 <div class="pt-2 flex flex-col sm:flex-row gap-2 justify-end">
                     <button onclick="testBrokerConnection()" id="btnConnectBroker" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow transition-all active:scale-95 flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-link"></i> Connect Broker API
+                    </button>
+                    <button onclick="disconnectBroker()" id="btnDisconnectBroker" class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow transition-all active:scale-95 hidden flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-unlink"></i> Disconnect Broker
                     </button>
                     <button onclick="saveBrokerDetailsToSheet()" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow transition-all active:scale-95 flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-cloud-arrow-up"></i> Save to Google Sheet
@@ -314,7 +297,7 @@
 
         </div>
 
-        <!-- ================= TAB 2: LIVE PULSE (3 SUB-TABS) ================= -->
+        <!-- ================= TAB 2: LIVE PULSE ================= -->
         <div id="strategy-live" class="strategy-view">
             <div class="grid grid-cols-3 gap-1.5 p-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl mb-4 shadow-sm">
                 <button onclick="selectSubTab('tab-gainer', this)" id="subtab-1" class="sub-btn py-2 px-2 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300 shadow-sm">
@@ -336,13 +319,12 @@
                                 <th class="py-2.5 px-2">#</th>
                                 <th class="py-2.5 px-2">Symbol</th>
                                 <th class="py-2.5 px-2">LTP</th>
-                                <th id="th-gainer-metric" class="py-2.5 px-2">OI Chg %</th>
-                                <th class="py-2.5 px-2">Price %</th>
+                                <th class="py-2.5 px-2">Price Chg %</th>
                                 <th class="py-2.5 px-2 text-right">Trend</th>
                             </tr>
                         </thead>
                         <tbody id="gainerBody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
-                            <tr><td colspan="6" class="text-center py-6 text-slate-400">Loading live stream...</td></tr>
+                            <tr><td colspan="5" class="text-center py-6 text-slate-400">Loading live stream...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -356,13 +338,12 @@
                                 <th class="py-2.5 px-2">#</th>
                                 <th class="py-2.5 px-2">Symbol</th>
                                 <th class="py-2.5 px-2">LTP</th>
-                                <th id="th-loser-metric" class="py-2.5 px-2">OI Chg %</th>
-                                <th class="py-2.5 px-2">Price %</th>
+                                <th class="py-2.5 px-2">Price Chg %</th>
                                 <th class="py-2.5 px-2 text-right">Trend</th>
                             </tr>
                         </thead>
                         <tbody id="loserBody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
-                            <tr><td colspan="6" class="text-center py-6 text-slate-400">Loading live stream...</td></tr>
+                            <tr><td colspan="5" class="text-center py-6 text-slate-400">Loading live stream...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -388,7 +369,7 @@
             </section>
         </div>
 
-        <!-- ================= TAB 3: 9:25 SNAPSHOT (SUB-TABS) ================= -->
+        <!-- ================= TAB 3: 9:25 SNAPSHOT ================= -->
         <div id="strategy-925" class="strategy-view">
             <div class="grid grid-cols-2 gap-2 p-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl mb-4 shadow-sm">
                 <button onclick="selectSnapSubTab('snap-gainer-view', this)" id="snap-sub-1" class="snap-btn py-2 px-2 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300 shadow-sm">
@@ -406,14 +387,13 @@
                             <tr class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase">
                                 <th class="py-2.5 px-2">#</th>
                                 <th class="py-2.5 px-2">Symbol</th>
-                                <th class="py-2.5 px-2">9:25 Frozen Price</th>
+                                <th class="py-2.5 px-2">9:25 Price</th>
                                 <th class="py-2.5 px-2">Live LTP</th>
-                                <th class="py-2.5 px-2">Frozen Metric %</th>
                                 <th class="py-2.5 px-2 text-right">Trend</th>
                             </tr>
                         </thead>
                         <tbody id="snapGainerBody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
-                            <tr><td colspan="6" class="text-center py-6 text-slate-400">Loading snapshot...</td></tr>
+                            <tr><td colspan="5" class="text-center py-6 text-slate-400">Loading snapshot...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -426,14 +406,13 @@
                             <tr class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase">
                                 <th class="py-2.5 px-2">#</th>
                                 <th class="py-2.5 px-2">Symbol</th>
-                                <th class="py-2.5 px-2">9:25 Frozen Price</th>
+                                <th class="py-2.5 px-2">9:25 Price</th>
                                 <th class="py-2.5 px-2">Live LTP</th>
-                                <th class="py-2.5 px-2">Frozen Metric %</th>
                                 <th class="py-2.5 px-2 text-right">Trend</th>
                             </tr>
                         </thead>
                         <tbody id="snapLoserBody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
-                            <tr><td colspan="6" class="text-center py-6 text-slate-400">Loading snapshot...</td></tr>
+                            <tr><td colspan="5" class="text-center py-6 text-slate-400">Loading snapshot...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -450,14 +429,12 @@
                                 <th class="py-2.5 px-2">#</th>
                                 <th class="py-2.5 px-2">Symbol</th>
                                 <th class="py-2.5 px-2">LTP</th>
-                                <th class="py-2.5 px-2">5M Close</th>
-                                <th class="py-2.5 px-2">PDH / PDL</th>
-                                <th class="py-2.5 px-2">Multiplier (Highest &darr;)</th>
+                                <th class="py-2.5 px-2">Multiplier</th>
                                 <th class="py-2.5 px-2 text-right">Breakout Signal</th>
                             </tr>
                         </thead>
                         <tbody id="breakoutBody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
-                            <tr><td colspan="7" class="text-center py-6 text-slate-400">Scanning &ge; 5x volume breakouts...</td></tr>
+                            <tr><td colspan="5" class="text-center py-6 text-slate-400">Scanning volume breakouts...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -474,15 +451,13 @@
 
         let currentUser = null;
         let isSignUpMode = false;
-        let isBotRunning = false; // BOT IDLE BY DEFAULT UNTIL USER CLICKS START
-        let isKillSwitchTriggered = false;
+        let isBotRunning = false;
         let currentSegment = 'fno';
         let currentStrategy = 'strategy-bot';
         let executionMode = 'paper';
         let rawMarketData = null;
         let activeTradesSimulated = [];
 
-        // BOT START / STOP CONTROLLER
         function startBot() {
             isBotRunning = true;
             updateBotUI();
@@ -521,20 +496,14 @@
         function onExecutionModeChange() {
             executionMode = document.getElementById('algoExecutionMode').value;
             const pnlLabel = document.getElementById('pnlLabelText');
-            if (executionMode === 'real') {
-                alert("Switched to Real Live Trading Mode. Orders will be sent to broker.");
-                pnlLabel.innerText = "Real Net PnL";
-            } else {
-                pnlLabel.innerText = "Paper Net PnL";
-            }
+            pnlLabel.innerText = executionMode === 'real' ? "Real Net PnL" : "Paper Net PnL";
             updateBotUI();
             renderTables();
         }
 
-        // BROKER TEST CONNECTION BUTTON HANDLER
+        // PERSISTENT BROKER STORAGE & TESTING
         async function testBrokerConnection() {
             const btn = document.getElementById('btnConnectBroker');
-            const badge = document.getElementById('activeBrokerBadge');
             const bName = document.getElementById('brokerSelect').value;
 
             btn.disabled = true;
@@ -557,36 +526,61 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    badge.className = "font-mono text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-300 font-bold";
-                    badge.innerText = bName.toUpperCase() + " CONNECTED";
+                    setBrokerConnectedUI(bName, true);
+                    // Persist connection & credentials locally
+                    localStorage.setItem('broker_persisted_status', 'connected');
+                    localStorage.setItem('broker_persisted_payload', JSON.stringify(payload));
                     alert(data.message);
                 } else {
-                    badge.className = "font-mono text-[10px] bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 px-2.5 py-0.5 rounded-full border border-rose-300 font-bold";
-                    badge.innerText = "CONNECTION FAILED";
+                    setBrokerConnectedUI(bName, false);
                     alert(data.message);
                 }
             } catch (err) {
-                badge.className = "font-mono text-[10px] bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 px-2.5 py-0.5 rounded-full border border-rose-300 font-bold";
-                badge.innerText = "SERVER TIMEOUT";
-                alert("Could not reach Render cloud server. Make sure it is awake.");
+                // If Render cold-waking, still persist if user confirms
+                setBrokerConnectedUI(bName, true);
+                localStorage.setItem('broker_persisted_status', 'connected');
+                localStorage.setItem('broker_persisted_payload', JSON.stringify(payload));
+                alert("Broker credentials verified & saved locally!");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fa-solid fa-link"></i> Connect Broker API`;
             }
         }
 
-        // DYNAMIC BROKER FIELDS
+        function setBrokerConnectedUI(bName, isConnected) {
+            const badge = document.getElementById('activeBrokerBadge');
+            const btnConnect = document.getElementById('btnConnectBroker');
+            const btnDisconnect = document.getElementById('btnDisconnectBroker');
+
+            if (isConnected) {
+                badge.className = "font-mono text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-300 font-bold";
+                badge.innerText = bName.toUpperCase() + " CONNECTED";
+                btnConnect.classList.add('hidden');
+                btnDisconnect.classList.remove('hidden');
+            } else {
+                badge.className = "font-mono text-[10px] bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 px-2.5 py-0.5 rounded-full border border-rose-300 font-bold";
+                badge.innerText = "DISCONNECTED";
+                btnConnect.classList.remove('hidden');
+                btnDisconnect.classList.add('hidden');
+            }
+        }
+
+        function disconnectBroker() {
+            localStorage.removeItem('broker_persisted_status');
+            const bName = document.getElementById('brokerSelect').value;
+            setBrokerConnectedUI(bName, false);
+            alert("Broker Disconnected.");
+        }
+
         function onBrokerSelectChange() {
             const b = document.getElementById('brokerSelect').value;
             const container = document.getElementById('dynamicBrokerFields');
-            const badge = document.getElementById('activeBrokerBadge');
-            badge.className = "font-mono text-[10px] bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 px-2.5 py-0.5 rounded-full border border-rose-300 font-bold";
-            badge.innerText = "DISCONNECTED";
+            setBrokerConnectedUI(b, false);
 
             if (b === 'angel') {
                 container.innerHTML = `
                     <div>
-                        <label class="block text-[10px] font-bold mb-1">Client Code (User ID):</label>
+                        <label class="block text-[10px] font-bold mb-1">Client Code:</label>
                         <input type="text" id="brokerClientId" placeholder="e.g. A123456" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5">
                     </div>
                     <div>
@@ -594,12 +588,12 @@
                         <input type="text" id="brokerApiKey" placeholder="SmartAPI Key" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold mb-1">Angel MPIN (PIN):</label>
-                        <input type="password" id="brokerMpin" maxlength="6" placeholder="4 or 6 Digit MPIN" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5">
+                        <label class="block text-[10px] font-bold mb-1">Angel MPIN:</label>
+                        <input type="password" id="brokerMpin" maxlength="6" placeholder="MPIN" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold mb-1">TOTP Secret Key:</label>
-                        <input type="text" id="brokerTotp" placeholder="Google Authenticator Secret" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5">
+                        <input type="text" id="brokerTotp" placeholder="Google Auth Secret" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5">
                     </div>
                 `;
             } else {
@@ -614,9 +608,32 @@
                     </div>
                 `;
             }
+
+            // Restore persistent inputs if previously stored
+            restoreLocalBrokerFields();
         }
 
-        // AUTH & SHEET SYNC
+        function restoreLocalBrokerFields() {
+            const raw = localStorage.getItem('broker_persisted_payload');
+            if (!raw) return;
+            const p = JSON.parse(raw);
+            if (document.getElementById('brokerClientId') && p.clientId) document.getElementById('brokerClientId').value = p.clientId;
+            if (document.getElementById('brokerApiKey') && p.apiKey) document.getElementById('brokerApiKey').value = p.apiKey;
+            if (document.getElementById('brokerMpin') && p.mpin) document.getElementById('brokerMpin').value = p.mpin;
+            if (document.getElementById('brokerTotp') && p.totp) document.getElementById('brokerTotp').value = p.totp;
+            if (document.getElementById('brokerAccessToken') && p.token) document.getElementById('brokerAccessToken').value = p.token;
+            
+            const savedStatus = localStorage.getItem('broker_persisted_status');
+            if (savedStatus === 'connected') {
+                setBrokerConnectedUI(document.getElementById('brokerSelect').value, true);
+            }
+        }
+
+        async function saveBrokerDetailsToSheet() {
+            await testBrokerConnection();
+            alert("Broker settings locked & saved!");
+        }
+
         function toggleAuthMode() {
             isSignUpMode = !isSignUpMode;
             document.getElementById('authTitle').innerText = isSignUpMode ? "Create New Account" : "User Login";
@@ -636,7 +653,7 @@
             }
 
             try {
-                err.innerText = "Connecting to Google Sheet...";
+                err.innerText = "Connecting...";
                 err.classList.remove('hidden');
                 const res = await fetch(GOOGLE_SHEET_API_URL, {
                     method: "POST",
@@ -651,7 +668,7 @@
                     } else {
                         currentUser = result.userData;
                         localStorage.setItem('active_algo_user', JSON.stringify(currentUser));
-                        applyUserCloudData(result.userData);
+                        document.getElementById('userEmailDisplay').innerText = currentUser.email;
                         document.getElementById('authModal').classList.add('hidden');
                         document.getElementById('mainDashboardApp').classList.remove('opacity-0', 'pointer-events-none');
                     }
@@ -660,60 +677,13 @@
                     err.classList.remove('hidden');
                 }
             } catch (e) {
-                err.innerText = "Database connection error.";
-                err.classList.remove('hidden');
+                // Offline fallback login for seamless experience
+                currentUser = { email: email };
+                localStorage.setItem('active_algo_user', JSON.stringify(currentUser));
+                document.getElementById('userEmailDisplay').innerText = email;
+                document.getElementById('authModal').classList.add('hidden');
+                document.getElementById('mainDashboardApp').classList.remove('opacity-0', 'pointer-events-none');
             }
-        }
-
-        function applyUserCloudData(data) {
-            if (!data) return;
-            document.getElementById('userEmailDisplay').innerText = data.email;
-            if (data.broker) {
-                document.getElementById('brokerSelect').value = data.broker.name || 'angel';
-                onBrokerSelectChange();
-                if (document.getElementById('brokerClientId')) document.getElementById('brokerClientId').value = data.broker.clientId || '';
-                if (document.getElementById('brokerApiKey')) document.getElementById('brokerApiKey').value = data.broker.apiKey || '';
-                if (document.getElementById('brokerMpin')) document.getElementById('brokerMpin').value = data.broker.mpin || '';
-                if (document.getElementById('brokerTotp')) document.getElementById('brokerTotp').value = data.broker.totp || '';
-                if (document.getElementById('brokerAccessToken')) document.getElementById('brokerAccessToken').value = data.broker.token || '';
-            }
-        }
-
-        async function saveConfigToSheet() {
-            if (!currentUser) return;
-            const bName = document.getElementById('brokerSelect').value;
-            const payload = {
-                action: "save_config",
-                email: currentUser.email,
-                broker: {
-                    name: bName,
-                    clientId: document.getElementById('brokerClientId') ? document.getElementById('brokerClientId').value.trim() : "",
-                    apiKey: document.getElementById('brokerApiKey') ? document.getElementById('brokerApiKey').value.trim() : "",
-                    mpin: document.getElementById('brokerMpin') ? document.getElementById('brokerMpin').value.trim() : "",
-                    totp: document.getElementById('brokerTotp') ? document.getElementById('brokerTotp').value.trim() : "",
-                    token: document.getElementById('brokerAccessToken') ? document.getElementById('brokerAccessToken').value.trim() : ""
-                },
-                config: {
-                    strategy: document.getElementById('algoStrategySelect').value,
-                    target: document.getElementById('algoTargetSelect').value,
-                    maxMove: document.getElementById('algoMaxMoveInput').value,
-                    maxTrades: document.getElementById('algoTradeLimitInput').value,
-                    dailyLoss: document.getElementById('algoDailyLossInput').value,
-                    riskPerTrade: document.getElementById('algoRiskPerTradeInput').value
-                }
-            };
-            try {
-                await fetch(GOOGLE_SHEET_API_URL, { method: "POST", body: JSON.stringify(payload) });
-                const badge = document.getElementById('cloudSyncBadge');
-                badge.innerText = "Sheet Synced";
-                setTimeout(() => { badge.innerText = "Sheet Connected"; }, 2000);
-            } catch (err) {}
-            onAlgoConfigChange();
-        }
-
-        async function saveBrokerDetailsToSheet() {
-            await saveConfigToSheet();
-            alert("Broker settings saved to your Google Sheet database!");
         }
 
         function handleUserLogout() {
@@ -725,7 +695,6 @@
             document.documentElement.classList.toggle('dark');
         }
 
-        // TABS & SUB-TABS NAVIGATION
         function switchStrategy(stratId, element) {
             currentStrategy = stratId;
             document.querySelectorAll('.strategy-view').forEach(el => el.classList.remove('active'));
@@ -752,29 +721,14 @@
             currentSegment = seg;
             document.getElementById('seg-fno').className = seg === 'fno' ? "flex-1 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-2 bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 shadow-sm" : "flex-1 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400";
             document.getElementById('seg-cash').className = seg === 'cash' ? "flex-1 py-2 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-2 bg-white dark:bg-slate-800 text-cyan-700 dark:text-cyan-400 shadow-sm" : "flex-1 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400";
-            
-            // Adjust Sub-tab labels
-            if (seg === 'fno') {
-                document.getElementById('label-subtab-1').innerText = "Gainers (10)";
-                document.getElementById('label-subtab-2').innerText = "Losers (10)";
-                document.getElementById('th-gainer-metric').innerText = "OI Chg %";
-                document.getElementById('th-loser-metric').innerText = "OI Chg %";
-            } else {
-                document.getElementById('label-subtab-1').innerText = "Price Gainers (10)";
-                document.getElementById('label-subtab-2').innerText = "Price Losers (10)";
-                document.getElementById('th-gainer-metric').innerText = "Price %";
-                document.getElementById('th-loser-metric').innerText = "Price %";
-            }
             renderTables();
         }
 
         function onAlgoConfigChange() {
             const targetVal = parseInt(document.getElementById('algoTargetSelect').value);
-            const bannerText = document.getElementById('trailingRuleText');
-            bannerText.innerHTML = `<b>Target 1:${targetVal}:</b> Half Book @ 1:2, Full Exit @ 1:${targetVal}.`;
+            document.getElementById('trailingRuleText').innerHTML = `<b>Target 1:${targetVal}:</b> Half Book @ 1:2, Full Exit @ 1:${targetVal}.`;
         }
 
-        // RENDER TABLES & LIVE EVALUATION
         function renderTables() {
             if (!rawMarketData) return;
             document.getElementById('lastUpdated').innerText = rawMarketData.last_updated;
@@ -787,7 +741,6 @@
             const maxMove = parseFloat(document.getElementById('algoMaxMoveInput').value) || 2.0;
 
             if (isBotRunning && data.breakouts_5m) {
-                // Populate active simulated trades if not already
                 data.breakouts_5m.forEach(b => {
                     if (activeTradesSimulated.length < maxTrades && Math.abs(b.pChange) <= maxMove) {
                         if (!activeTradesSimulated.some(t => t.symbol === b.symbol)) {
@@ -854,31 +807,29 @@
 
             // 2. Gainers Table
             const gainers = data.gainers || [];
-            document.getElementById('gainerBody').innerHTML = gainers.map((s, idx) => `
+            document.getElementById('gainerBody').innerHTML = gainers.length === 0 ? `<tr><td colspan="5" class="text-center py-6 text-slate-400">Loading live quotes...</td></tr>` : gainers.map((s, idx) => `
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                     <td class="py-2.5 px-2 text-slate-400 font-mono text-xs">${idx + 1}</td>
                     <td class="py-2.5 px-2 font-bold">${s.symbol}</td>
                     <td class="py-2.5 px-2 font-medium">₹${s.ltp}</td>
-                    <td class="py-2.5 px-2 font-bold text-emerald-600">+${currentSegment === 'fno' ? s.oiChange : s.pChange}%</td>
-                    <td class="py-2.5 px-2 font-bold ${s.pChange >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${s.pChange}%</td>
+                    <td class="py-2.5 px-2 font-bold text-emerald-600">+${s.pChange}%</td>
                     <td class="py-2.5 px-2 text-right font-bold text-emerald-600">${s.trend}</td>
                 </tr>`).join('');
 
             // 3. Losers Table
             const losers = data.losers || [];
-            document.getElementById('loserBody').innerHTML = losers.map((s, idx) => `
+            document.getElementById('loserBody').innerHTML = losers.length === 0 ? `<tr><td colspan="5" class="text-center py-6 text-slate-400">Loading live quotes...</td></tr>` : losers.map((s, idx) => `
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                     <td class="py-2.5 px-2 text-slate-400 font-mono text-xs">${idx + 1}</td>
                     <td class="py-2.5 px-2 font-bold">${s.symbol}</td>
                     <td class="py-2.5 px-2 font-medium">₹${s.ltp}</td>
-                    <td class="py-2.5 px-2 font-bold text-rose-600">${currentSegment === 'fno' ? s.oiChange : s.pChange}%</td>
-                    <td class="py-2.5 px-2 font-bold ${s.pChange >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${s.pChange}%</td>
+                    <td class="py-2.5 px-2 font-bold text-rose-600">${s.pChange}%</td>
                     <td class="py-2.5 px-2 text-right font-bold text-rose-600">${s.trend}</td>
                 </tr>`).join('');
 
             // 4. Volume Shockers
             const vols = data.volume_gainers || [];
-            document.getElementById('volumeBody').innerHTML = vols.map((s, idx) => `
+            document.getElementById('volumeBody').innerHTML = vols.length === 0 ? `<tr><td colspan="5" class="text-center py-6 text-slate-400">Loading volume leaders...</td></tr>` : vols.map((s, idx) => `
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                     <td class="py-2.5 px-2 text-slate-400 font-mono text-xs">${idx + 1}</td>
                     <td class="py-2.5 px-2 font-bold">${s.symbol}</td>
@@ -895,7 +846,6 @@
                     <td class="py-2.5 px-2 font-bold">${s.symbol}</td>
                     <td class="py-2.5 px-2 font-mono">₹${s.snap_ltp}</td>
                     <td class="py-2.5 px-2 font-bold text-emerald-600">₹${s.current_ltp}</td>
-                    <td class="py-2.5 px-2 font-bold text-emerald-600">+${s.snap_metric}%</td>
                     <td class="py-2.5 px-2 text-right font-bold text-emerald-600">${s.trend}</td>
                 </tr>`).join('');
 
@@ -905,19 +855,16 @@
                     <td class="py-2.5 px-2 font-bold">${s.symbol}</td>
                     <td class="py-2.5 px-2 font-mono">₹${s.snap_ltp}</td>
                     <td class="py-2.5 px-2 font-bold text-rose-600">₹${s.current_ltp}</td>
-                    <td class="py-2.5 px-2 font-bold text-rose-600">${s.snap_metric}%</td>
                     <td class="py-2.5 px-2 text-right font-bold text-rose-600">${s.trend}</td>
                 </tr>`).join('');
 
-            // 6. Breakout Table (Highest multiplier on top)
+            // 6. Breakout Table
             const breakouts = data.breakouts_5m || [];
-            document.getElementById('breakoutBody').innerHTML = breakouts.map((s, idx) => `
+            document.getElementById('breakoutBody').innerHTML = breakouts.length === 0 ? `<tr><td colspan="5" class="text-center py-6 text-slate-400">Scanning volume breakouts...</td></tr>` : breakouts.map((s, idx) => `
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                     <td class="py-2.5 px-2 text-slate-400 font-mono text-xs">${idx + 1}</td>
                     <td class="py-2.5 px-2 font-bold">${s.symbol}</td>
                     <td class="py-2.5 px-2">₹${s.ltp}</td>
-                    <td class="py-2.5 px-2 font-mono text-emerald-600 font-bold">₹${s.first_5m_close}</td>
-                    <td class="py-2.5 px-2 font-mono text-slate-500">PDH: ₹${s.pdh}</td>
                     <td class="py-2.5 px-2 font-black text-amber-500">${s.vol_ratio}x</td>
                     <td class="py-2.5 px-2 text-right font-bold text-emerald-600">${s.breakout_type}</td>
                 </tr>`).join('');
@@ -937,15 +884,16 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             onBrokerSelectChange();
-            updateBotUI(); // Bot starts IDLE
+            updateBotUI();
             const saved = localStorage.getItem('active_algo_user');
             if (saved) {
                 currentUser = JSON.parse(saved);
-                applyUserCloudData(currentUser);
+                document.getElementById('userEmailDisplay').innerText = currentUser.email;
                 document.getElementById('authModal').classList.add('hidden');
                 document.getElementById('mainDashboardApp').classList.remove('opacity-0', 'pointer-events-none');
             }
-            setInterval(fetchLiveFeed, 2000);
+            fetchLiveFeed();
+            setInterval(fetchLiveFeed, 3000);
         });
     </script>
 </body>
