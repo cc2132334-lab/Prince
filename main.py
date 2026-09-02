@@ -137,6 +137,14 @@ def cloud_live_worker():
 
 threading.Thread(target=cloud_live_worker, daemon=True).start()
 
+@app.get("/")
+def home():
+    return {
+        "status": "Online",
+        "service": "Algo Trading Cloud Engine",
+        "live_feed_endpoint": "/live-data"
+    }
+
 @app.get("/live-data")
 def get_live_data():
     return market_state
