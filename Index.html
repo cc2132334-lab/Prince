@@ -5,17 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Market Screener & Cloud Algo Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config = { darkMode: 'class' }</script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         .strategy-view { display: none; }
         .strategy-view.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         .sub-content { display: none; }
         .sub-content.active { display: block; }
+        .snap-content { display: none; }
+        .snap-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen p-3 sm:p-5 font-sans">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen p-3 sm:p-5 font-sans transition-colors duration-200">
 
     <!-- LOGIN MODAL -->
     <div id="authModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
@@ -23,16 +27,35 @@
             <div class="h-12 w-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl mx-auto mb-3 shadow-sm">
                 <i class="fa-solid fa-user-lock"></i>
             </div>
+            
             <h2 id="authTitle" class="text-xl font-black text-center text-slate-800 dark:text-slate-100">User Login</h2>
-            <p id="authSubtitle" class="text-xs text-center text-slate-500 dark:text-slate-400 mt-1 mb-4">Login to access your private algo terminal</p>
+            <p id="authSubtitle" class="text-xs text-center text-slate-500 dark:text-slate-400 mt-1 mb-4">Login to access your private algo terminal & settings</p>
+            
             <div class="space-y-3">
-                <input type="email" id="authEmail" placeholder="your@email.com" class="w-full text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-800 dark:text-slate-100">
-                <input type="password" id="authPassword" placeholder="••••••••" class="w-full text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-800 dark:text-slate-100">
-                <p id="authErrorMsg" class="text-xs text-rose-500 font-semibold hidden"></p>
-                <button onclick="handleAuthSubmit()" id="authSubmitBtn" class="w-full py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md">Sign In to Terminal</button>
-                <div class="text-center pt-2">
-                    <button onclick="toggleAuthMode()" id="authToggleBtn" class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold hover:underline">Don't have an account? Create New Account</button>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Email Address:</label>
+                    <input type="email" id="authEmail" placeholder="your@email.com" class="w-full text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Password:</label>
+                    <input type="password" id="authPassword" placeholder="••••••••" class="w-full text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <p id="authErrorMsg" class="text-xs text-rose-500 font-semibold hidden"></p>
+
+                <button onclick="handleAuthSubmit()" id="authSubmitBtn" class="w-full py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all active:scale-95">
+                    Sign In to Terminal
+                </button>
+
+                <div class="text-center pt-2">
+                    <button onclick="toggleAuthMode()" id="authToggleBtn" class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold hover:underline">
+                        Don't have an account? Create New Account
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 text-[10px] text-center text-slate-400">
+                <i class="fa-solid fa-file-excel text-emerald-500 mr-1"></i> Connected to Google Sheets Cloud Database
             </div>
         </div>
     </div>
@@ -41,21 +64,29 @@
     <div id="mainDashboardApp" class="max-w-4xl mx-auto opacity-0 pointer-events-none transition-opacity duration-300">
         <header class="flex justify-between items-center pb-3 mb-3 border-b border-slate-300 dark:border-slate-800">
             <div>
-                <h1 class="text-xl sm:text-2xl font-black bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-emerald-600"></i> Market Screener
+                <h1 class="text-xl sm:text-2xl font-black bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 dark:from-emerald-400 dark:to-cyan-400 bg-clip-text text-transparent flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-emerald-600 dark:text-emerald-400"></i> Market Screener
                 </h1>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400">Continuous 2-Sec Live Cloud Stream</p>
+                <p id="subHeaderDesc" class="text-[11px] text-slate-500 dark:text-slate-400">Live 2-Sec Cloud Polling Engine</p>
             </div>
+            
             <div class="flex items-center gap-2">
-                <div class="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 px-2.5 py-1.5 rounded-xl text-xs">
+                <div class="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 px-2.5 py-1.5 rounded-xl text-xs shadow-sm">
                     <i class="fa-solid fa-circle-user text-emerald-500"></i>
-                    <span id="userEmailDisplay" class="font-bold">user</span>
-                    <button onclick="handleUserLogout()" class="text-rose-500 ml-1"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    <span id="userEmailDisplay" class="font-bold hidden sm:inline max-w-[120px] truncate">user</span>
+                    <button onclick="handleUserLogout()" title="Logout" class="text-rose-500 hover:text-rose-600 ml-1">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
                 </div>
+
+                <button onclick="toggleTheme()" id="themeBtn" class="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-amber-400 shadow-sm">
+                    <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+                </button>
+
                 <div class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 px-3 py-1.5 rounded-xl shadow-sm">
                     <span class="relative flex h-2.5 w-2.5">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600 dark:bg-emerald-500"></span>
                     </span>
                     <div class="text-right">
                         <span id="feedLiveStatusText" class="text-[9px] text-emerald-600 font-black block">LIVE CLOUD</span>
@@ -67,220 +98,413 @@
 
         <!-- Segment -->
         <div class="flex p-1 bg-slate-200 dark:bg-slate-900 rounded-xl mb-3 border border-slate-300 dark:border-slate-800">
-            <button onclick="switchSegment('fno')" id="seg-fno" class="flex-1 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white dark:bg-slate-800 text-emerald-700 shadow-sm">F&O Segment</button>
-            <button onclick="switchSegment('cash')" id="seg-cash" class="flex-1 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400">Cash Segment</button>
+            <button onclick="switchSegment('fno')" id="seg-fno" class="flex-1 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 shadow-sm">
+                <i class="fa-solid fa-layer-group"></i> F&O Segment
+            </button>
+            <button onclick="switchSegment('cash')" id="seg-cash" class="flex-1 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400">
+                <i class="fa-solid fa-money-bill-wave"></i> Cash (Equity) Segment
+            </button>
         </div>
 
-        <!-- Tabs -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl mb-4">
-            <button onclick="switchStrategy('strategy-bot', this)" class="strat-btn py-2.5 px-2 rounded-lg text-xs sm:text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-300"><i class="fa-solid fa-robot mr-1"></i> Algo Engine</button>
-            <button onclick="switchStrategy('strategy-live', this)" class="strat-btn py-2.5 px-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600"><i class="fa-solid fa-chart-pie mr-1"></i> Live Pulse</button>
-            <button onclick="switchStrategy('strategy-925', this)" class="strat-btn py-2.5 px-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600"><i class="fa-solid fa-clock mr-1"></i> 9:25 Snapshot</button>
-            <button onclick="switchStrategy('strategy-breakout', this)" class="strat-btn py-2.5 px-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600"><i class="fa-solid fa-bolt mr-1"></i> 5M 5x Volume</button>
+        <!-- 4 Tabs -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl mb-4 shadow-sm">
+            <button onclick="switchStrategy('strategy-bot', this)" id="strat-bot-btn" class="strat-btn py-2.5 px-2 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300 shadow-sm transition-all">
+                <i class="fa-solid fa-robot"></i> <span>Algo Engine</span>
+            </button>
+            <button onclick="switchStrategy('strategy-live', this)" id="strat-live-btn" class="strat-btn py-2.5 px-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-400 border border-transparent transition-all">
+                <i class="fa-solid fa-chart-pie"></i> <span id="label-strat-1">Live Pulse</span>
+            </button>
+            <button onclick="switchStrategy('strategy-925', this)" id="strat-925-btn" class="strat-btn py-2.5 px-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-400 border border-transparent transition-all">
+                <i class="fa-solid fa-clock text-blue-500"></i> <span>9:25 Snapshot</span>
+            </button>
+            <button onclick="switchStrategy('strategy-breakout', this)" id="strat-breakout-btn" class="strat-btn py-2.5 px-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-400 border border-transparent transition-all">
+                <i class="fa-solid fa-bolt text-amber-500"></i> <span>5M 5x Volume</span>
+            </button>
         </div>
 
-        <!-- TAB 1: ALGO ENGINE -->
+        <!-- ================= TAB 1: ALGO ENGINE ================= -->
         <div id="strategy-bot" class="strategy-view active space-y-4">
-            <div class="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-4 shadow-md">
-                <div class="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800">
-                    <span class="font-extrabold text-sm text-slate-800 dark:text-slate-100">Algo Execution Controller</span>
-                    <span id="botStatusBadge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-100 text-amber-800 border-amber-300">PAPER TRADING</span>
+            
+            <div class="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-4 shadow-md transition-all">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div id="botIconContainer" class="h-11 w-11 rounded-xl bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-800 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl shadow-sm">
+                            <i id="botIcon" class="fa-solid fa-robot"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-extrabold text-sm sm:text-base text-slate-800 dark:text-slate-100">Automated Bot Controller</span>
+                                <span id="botStatusBadge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border-amber-300 flex items-center gap-1">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span> PAPER TRADING
+                                </span>
+                            </div>
+                            <p id="botStatusText" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Live Cloud Feed &bull; Simulated Virtual Orders (0 Risk)</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 self-stretch sm:self-auto">
+                        <button onclick="startBot()" id="btnStartBot" class="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all flex items-center justify-center gap-1.5 active:scale-95">
+                            <i class="fa-solid fa-play text-xs"></i> <span>Start Bot</span>
+                        </button>
+                        <button onclick="stopBot()" id="btnStopBot" class="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-rose-600 hover:text-white shadow-sm transition-all flex items-center justify-center gap-1.5 active:scale-95">
+                            <i class="fa-solid fa-stop text-xs"></i> <span>Stop Bot</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-3 text-xs">
+
+                <!-- Parameters Controls -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 mt-3.5">
                     <div>
-                        <label class="block font-bold mb-1">Trading Mode:</label>
-                        <select id="algoExecutionMode" onchange="onExecutionModeChange()" class="w-full font-bold bg-amber-50 dark:bg-slate-800 border border-amber-300 rounded-xl px-2.5 py-2">
-                            <option value="paper" selected>🧪 Live Paper Trade (0 Risk)</option>
-                            <option value="real">⚡ Live Real Trade (Demat Orders)</option>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Trading Mode:</label>
+                        <select id="algoExecutionMode" onchange="onExecutionModeChange()" class="w-full text-xs font-bold bg-amber-50 dark:bg-slate-800 border border-amber-300 dark:border-amber-600 rounded-xl px-2.5 py-2 text-amber-900 dark:text-amber-300 focus:ring-2 focus:ring-amber-500 shadow-sm">
+                            <option value="paper" selected>🧪 Live Paper Trade (Virtual / Zero Risk)</option>
+                            <option value="real">⚡ Live Real Trade (Real Demat Orders)</option>
                         </select>
                     </div>
+
                     <div>
-                        <label class="block font-bold mb-1">Target Level:</label>
-                        <select id="algoTargetSelect" onchange="saveConfigToSheet()" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl px-2.5 py-2">
-                            <option value="2">Target 1:2 (100% Exit)</option>
-                            <option value="3">Target 1:3 (Half @ 1:2, Exit @ 1:3)</option>
-                            <option value="4" selected>Target 1:4 (Trail & Exit @ 1:4)</option>
-                            <option value="5">Target 1:5 (Trail & Exit @ 1:5)</option>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Strategy:</label>
+                        <select id="algoStrategySelect" onchange="saveConfigToSheet()" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-2 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 shadow-sm">
+                            <option value="combined">🚀 Combine Mode (1 + 2)</option>
+                            <option value="strat1">⚡ Strat 1 (5M 5x Vol)</option>
+                            <option value="strat2">⏰ Strat 2 (9:25 Top 5)</option>
                         </select>
                     </div>
+
                     <div>
-                        <label class="block font-bold mb-1">Max Risk Per Trade (₹):</label>
-                        <input type="number" id="algoRiskPerTradeInput" value="1000" onchange="saveConfigToSheet()" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl px-2.5 py-2 font-bold">
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Target Level (Full Exit):</label>
+                        <select id="algoTargetSelect" onchange="saveConfigToSheet()" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-2 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 shadow-sm">
+                            <option value="1">Target 1:1</option>
+                            <option value="2">Target 1:2</option>
+                            <option value="3">Target 1:3</option>
+                            <option value="4" selected>Target 1:4 (Trail & Full Exit)</option>
+                            <option value="5">Target 1:5</option>
+                            <option value="10">Target 1:10</option>
+                        </select>
                     </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Max C1 Move Cap (%):</label>
+                        <input type="number" id="algoMaxMoveInput" step="0.1" min="0.5" max="10" value="2.0" onchange="saveConfigToSheet()" class="w-full text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 shadow-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Max Trades Limit:</label>
+                        <input type="number" id="algoTradeLimitInput" min="1" max="20" value="3" onchange="saveConfigToSheet()" class="w-full text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 shadow-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Max Risk Per Trade (₹):</label>
+                        <input type="number" id="algoRiskPerTradeInput" step="100" min="100" value="1000" onchange="saveConfigToSheet()" class="w-full text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 shadow-sm">
+                    </div>
+                </div>
+
+                <div class="mt-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 flex justify-between items-center text-xs">
+                    <span id="trailingRuleText" class="text-slate-600 dark:text-slate-300">Continuous Trailing Active</span>
+                    <span id="cloudSyncBadge" class="font-mono text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded border border-emerald-300 font-bold">Sheet Connected</span>
                 </div>
             </div>
 
-            <!-- Embedded Broker Card -->
-            <div class="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-4 shadow-md">
-                <div class="flex justify-between items-center pb-2 mb-3 border-b border-slate-200 dark:border-slate-800">
-                    <span class="font-extrabold text-sm text-slate-800 dark:text-slate-100"><i class="fa-solid fa-plug text-emerald-500 mr-1.5"></i> Broker API Settings</span>
-                    <span id="activeBrokerBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">ANGEL ONE</span>
+            <!-- EMBEDDED BROKER CARD -->
+            <div class="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-4 shadow-md transition-all">
+                <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-plug text-emerald-600 dark:text-emerald-400 text-base"></i>
+                        <h3 class="font-extrabold text-sm sm:text-base text-slate-800 dark:text-slate-100">Broker API & Demat Account Settings</h3>
+                    </div>
+                    <span id="activeBrokerBadge" class="font-mono text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-300 font-bold">
+                        ANGEL ONE ACTIVE
+                    </span>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-                    <div>
-                        <label class="block font-bold mb-1">Broker:</label>
-                        <select id="brokerSelect" onchange="onBrokerSelectChange()" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl px-2.5 py-2">
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                    <div class="sm:col-span-1">
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Select Demat Broker:</label>
+                        <select id="brokerSelect" onchange="onBrokerSelectChange()" class="w-full text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500">
                             <option value="angel" selected>Angel One (SmartAPI)</option>
-                            <option value="dhan">Dhan</option>
-                            <option value="fyers">Fyers</option>
-                            <option value="upstox">Upstox</option>
+                            <option value="dhan">Dhan (DhanHQ API)</option>
+                            <option value="fyers">Fyers (Fyers API v3)</option>
+                            <option value="upstox">Upstox (Upstox Pro API)</option>
                         </select>
                     </div>
-                    <div id="dynamicBrokerFields" class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+
+                    <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="dynamicBrokerFields">
+                        <!-- Loaded dynamically -->
+                    </div>
                 </div>
-                <div class="mt-3 flex justify-end">
-                    <button onclick="saveBrokerDetailsToSheet()" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700">Save Broker Settings to Google Sheet</button>
+
+                <div class="pt-2 flex justify-end">
+                    <button onclick="saveBrokerDetailsToSheet()" class="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow transition-all active:scale-95 flex items-center gap-1.5">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Save Broker Settings to Google Sheet
+                    </button>
                 </div>
             </div>
 
-            <!-- Trades Table -->
-            <div class="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-3 shadow-md overflow-x-auto">
-                <table class="w-full text-left text-xs whitespace-nowrap">
-                    <thead>
-                        <tr class="text-slate-400 border-b text-[10px] uppercase">
-                            <th class="py-2 px-2">Time</th>
-                            <th class="py-2 px-2">Mode</th>
-                            <th class="py-2 px-2">Symbol</th>
-                            <th class="py-2 px-2">Signal</th>
-                            <th class="py-2 px-2">Qty</th>
-                            <th class="py-2 px-2">Entry</th>
-                            <th class="py-2 px-2">LTP</th>
-                            <th class="py-2 px-2">Status</th>
-                            <th class="py-2 px-2 text-right">PnL (₹)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="executedTradesBody">
-                        <tr><td colspan="9" class="text-center py-6 text-slate-400">Waiting for live breakout signals...</td></tr>
-                    </tbody>
-                </table>
+            <!-- PnL Stat Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl p-3 shadow-sm">
+                    <span id="pnlLabelText" class="text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400 font-bold block">Paper Net PnL</span>
+                    <span id="statTotalPnl" class="text-base sm:text-lg font-black font-mono text-emerald-600 dark:text-emerald-400">+₹0.00</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl p-3 shadow-sm">
+                    <span class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold block">Trades Executed</span>
+                    <span id="statTradeCount" class="text-base sm:text-lg font-black font-mono text-slate-800 dark:text-slate-100">0 / 3</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl p-3 shadow-sm">
+                    <span class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold block">Win Rate</span>
+                    <span id="statWinRate" class="text-base sm:text-lg font-black font-mono text-indigo-600 dark:text-indigo-400">0%</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl p-3 shadow-sm">
+                    <span class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold block">Risk Buffer Left</span>
+                    <span id="statRiskBuffer" class="text-base sm:text-lg font-black font-mono text-slate-800 dark:text-slate-100">₹2,000</span>
+                </div>
             </div>
+
+            <!-- Executed Trades Log -->
+            <div class="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-md">
+                <div class="flex items-center justify-between pb-2.5 mb-2 border-b border-slate-200 dark:border-slate-800 text-xs">
+                    <div class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                        <i class="fa-solid fa-list-check text-emerald-600 dark:text-emerald-400"></i> Executed Trades (Quantity = Risk / |Entry - SL|)
+                    </div>
+                    <span id="tradeTableLimitStatus" class="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 font-bold px-2 py-0.5 rounded border border-amber-300">
+                        Paper Active
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs whitespace-nowrap">
+                        <thead>
+                            <tr class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-[10px] uppercase">
+                                <th class="py-2.5 px-2">Time</th>
+                                <th class="py-2.5 px-2">Mode</th>
+                                <th class="py-2.5 px-2">Symbol</th>
+                                <th class="py-2.5 px-2">Signal</th>
+                                <th class="py-2.5 px-2">Qty</th>
+                                <th class="py-2.5 px-2">Entry</th>
+                                <th class="py-2.5 px-2">SL</th>
+                                <th class="py-2.5 px-2">LTP</th>
+                                <th class="py-2.5 px-2">Trade Status</th>
+                                <th class="py-2.5 px-2 text-right">PnL (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="executedTradesBody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                            <tr><td colspan="10" class="text-center py-6 text-slate-400">Waiting for live breakout signals...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
 
-        <!-- TAB 2: LIVE PULSE -->
-        <div id="strategy-live" class="strategy-view bg-white dark:bg-slate-900 border rounded-2xl p-3 shadow-md overflow-x-auto">
-            <table class="w-full text-left text-xs whitespace-nowrap">
-                <thead>
-                    <tr class="text-slate-400 border-b text-[10px] uppercase">
-                        <th class="py-2 px-2">#</th>
-                        <th class="py-2 px-2">Symbol</th>
-                        <th class="py-2 px-2">LTP</th>
-                        <th class="py-2 px-2">OI Chg %</th>
-                        <th class="py-2 px-2">Price %</th>
-                        <th class="py-2 px-2 text-right">Trend</th>
-                    </tr>
-                </thead>
-                <tbody id="gainerBody">
-                    <tr><td colspan="6" class="text-center py-6 text-slate-400">Connecting to live cloud stream...</td></tr>
-                </tbody>
-            </table>
+        <!-- ================= TAB 2: LIVE PULSE ================= -->
+        <div id="strategy-live" class="strategy-view">
+            <section class="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-md">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                        <thead>
+                            <tr class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase">
+                                <th class="py-2.5 px-2">#</th>
+                                <th class="py-2.5 px-2">Symbol</th>
+                                <th class="py-2.5 px-2">LTP</th>
+                                <th class="py-2.5 px-2">OI Chg %</th>
+                                <th class="py-2.5 px-2">Price %</th>
+                                <th class="py-2.5 px-2 text-right">Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gainerBody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                            <tr><td colspan="6" class="text-center py-6 text-slate-400">Connecting to live cloud stream...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
 
-        <!-- TAB 3: 9:25 SNAPSHOT -->
-        <div id="strategy-925" class="strategy-view bg-white dark:bg-slate-900 border rounded-2xl p-3 shadow-md overflow-x-auto">
-            <table class="w-full text-left text-xs whitespace-nowrap">
-                <thead>
-                    <tr class="text-slate-400 border-b text-[10px] uppercase">
-                        <th class="py-2 px-2">#</th>
-                        <th class="py-2 px-2">Symbol</th>
-                        <th class="py-2 px-2">9:25 Price</th>
-                        <th class="py-2 px-2">Live LTP</th>
-                        <th class="py-2 px-2 text-right">Trend</th>
-                    </tr>
-                </thead>
-                <tbody id="snapGainerBody">
-                    <tr><td colspan="5" class="text-center py-6 text-slate-400">Waiting for 9:25 AM snapshot...</td></tr>
-                </tbody>
-            </table>
+        <!-- ================= TAB 3: 9:25 SNAPSHOT ================= -->
+        <div id="strategy-925" class="strategy-view">
+            <section class="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-md">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                        <thead>
+                            <tr class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase">
+                                <th class="py-2.5 px-2">#</th>
+                                <th class="py-2.5 px-2">Symbol</th>
+                                <th class="py-2.5 px-2">9:25 Price</th>
+                                <th class="py-2.5 px-2">Live LTP</th>
+                                <th class="py-2.5 px-2 text-right">Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody id="snapGainerBody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                            <tr><td colspan="5" class="text-center py-6 text-slate-400">Waiting for 9:25 AM snapshot...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
 
-        <!-- TAB 4: 5M BREAKOUT -->
-        <div id="strategy-breakout" class="strategy-view bg-white dark:bg-slate-900 border rounded-2xl p-3 shadow-md overflow-x-auto">
-            <table class="w-full text-left text-xs whitespace-nowrap">
-                <thead>
-                    <tr class="text-slate-400 border-b text-[10px] uppercase">
-                        <th class="py-2 px-2">#</th>
-                        <th class="py-2 px-2">Symbol</th>
-                        <th class="py-2 px-2">LTP</th>
-                        <th class="py-2 px-2">Multiplier (Highest &darr;)</th>
-                        <th class="py-2.5 px-2 text-right">Breakout Signal</th>
-                    </tr>
-                </thead>
-                <tbody id="breakoutBody">
-                    <tr><td colspan="5" class="text-center py-6 text-slate-400">Scanning &ge; 5x volume breakouts...</td></tr>
-                </tbody>
-            </table>
+        <!-- ================= TAB 4: 5M 5x BREAKOUT ================= -->
+        <div id="strategy-breakout" class="strategy-view">
+            <section class="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-md">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                        <thead>
+                            <tr class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase">
+                                <th class="py-2.5 px-2">#</th>
+                                <th class="py-2.5 px-2">Symbol</th>
+                                <th class="py-2.5 px-2">LTP</th>
+                                <th class="py-2.5 px-2">Vol Multiplier (Highest &darr;)</th>
+                                <th class="py-2.5 px-2 text-right">Breakout Signal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="breakoutBody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                            <tr><td colspan="5" class="text-center py-6 text-slate-400">Scanning &ge; 5x volume breakouts...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
+
     </div>
 
-    <!-- JS SCRIPT -->
+    <!-- JAVASCRIPT & CLOUD SYNC -->
     <script>
         const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwxPCcmStKmiPpqQ4bnF3vW-aECsc6R2C9R757F_50zvC0v4h4DHLS-QRNjaXkbVTmg/exec";
         
-        // REPLACE WITH YOUR RENDER LIVE CLOUD URL AFTER STEP 4
-        let LIVE_CLOUD_API_URL = "https://prince-vwo1.onrender.com/";
+        // Exact Render Live URL
+        const LIVE_CLOUD_API_URL = "https://prince-vwo1.onrender.com/live-data";
 
         let currentUser = null;
         let isSignUpMode = false;
+        let isBotRunning = true;
+        let isKillSwitchTriggered = false;
         let currentSegment = 'fno';
+        let currentStrategy = 'strategy-bot';
         let executionMode = 'paper';
         let rawMarketData = null;
 
         function toggleAuthMode() {
             isSignUpMode = !isSignUpMode;
             document.getElementById('authTitle').innerText = isSignUpMode ? "Create New Account" : "User Login";
-            document.getElementById('authSubmitBtn').innerText = isSignUpMode ? "Register Account" : "Sign In";
+            document.getElementById('authSubtitle').innerText = isSignUpMode ? "Sign up to create your secure algo trading record" : "Login to access your private algo terminal & settings";
+            document.getElementById('authSubmitBtn').innerText = isSignUpMode ? "Register Account" : "Sign In to Terminal";
+            document.getElementById('authToggleBtn').innerText = isSignUpMode ? "Already have an account? Sign In" : "Don't have an account? Create New Account";
+            document.getElementById('authErrorMsg').classList.add('hidden');
         }
 
         async function handleAuthSubmit() {
             const email = document.getElementById('authEmail').value.trim();
             const pass = document.getElementById('authPassword').value;
-            const res = await fetch(GOOGLE_SHEET_API_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: isSignUpMode ? "register" : "login", email: email, password: pass })
-            });
-            const result = await res.json();
-            if (result.success) {
-                if (isSignUpMode) {
-                    alert("Account created! Please Sign In.");
-                    toggleAuthMode();
-                } else {
-                    currentUser = result.userData;
-                    localStorage.setItem('active_algo_user', JSON.stringify(currentUser));
-                    document.getElementById('userEmailDisplay').innerText = currentUser.email;
-                    document.getElementById('authModal').classList.add('hidden');
-                    document.getElementById('mainDashboardApp').classList.remove('opacity-0', 'pointer-events-none');
-                }
-            } else {
-                alert(result.message);
+            const errEl = document.getElementById('authErrorMsg');
+
+            if (!email || !pass) {
+                errEl.innerText = "Please enter email and password.";
+                errEl.classList.remove('hidden');
+                return;
             }
+
+            try {
+                errEl.innerText = "Connecting to Google Sheet...";
+                errEl.classList.remove('hidden');
+
+                const res = await fetch(GOOGLE_SHEET_API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: isSignUpMode ? "register" : "login", email: email, password: pass })
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    errEl.classList.add('hidden');
+                    if (isSignUpMode) {
+                        alert("Account created successfully in Google Sheet! Please Sign In.");
+                        toggleAuthMode();
+                    } else {
+                        currentUser = result.userData;
+                        localStorage.setItem('active_algo_user', JSON.stringify(currentUser));
+                        applyUserCloudData(result.userData);
+                        document.getElementById('authModal').classList.add('hidden');
+                        document.getElementById('mainDashboardApp').classList.remove('opacity-0', 'pointer-events-none');
+                    }
+                } else {
+                    errEl.innerText = result.message;
+                    errEl.classList.remove('hidden');
+                }
+            } catch (e) {
+                errEl.innerText = "Connection error. Check Google Sheet Web App permissions.";
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        function applyUserCloudData(data) {
+            if (!data) return;
+            document.getElementById('userEmailDisplay').innerText = data.email;
+            
+            if (data.broker) {
+                document.getElementById('brokerSelect').value = data.broker.name || 'angel';
+                onBrokerSelectChange();
+                
+                if (document.getElementById('brokerClientId')) document.getElementById('brokerClientId').value = data.broker.clientId || '';
+                if (document.getElementById('brokerApiKey')) document.getElementById('brokerApiKey').value = data.broker.apiKey || '';
+                if (document.getElementById('brokerMpin')) document.getElementById('brokerMpin').value = data.broker.mpin || '';
+                if (document.getElementById('brokerTotp')) document.getElementById('brokerTotp').value = data.broker.totp || '';
+                if (document.getElementById('brokerAccessToken')) document.getElementById('brokerAccessToken').value = data.broker.token || '';
+            }
+            
+            if (data.config) {
+                document.getElementById('algoStrategySelect').value = data.config.strategy || 'combined';
+                document.getElementById('algoTargetSelect').value = data.config.target || '4';
+                document.getElementById('algoMaxMoveInput').value = data.config.maxMove || '2.0';
+                document.getElementById('algoTradeLimitInput').value = data.config.maxTrades || '3';
+                document.getElementById('algoRiskPerTradeInput').value = data.config.riskPerTrade || '1000';
+            }
+            onAlgoConfigChange();
         }
 
         function onBrokerSelectChange() {
             const b = document.getElementById('brokerSelect').value;
             const container = document.getElementById('dynamicBrokerFields');
-            document.getElementById('activeBrokerBadge').innerText = b.toUpperCase();
+            const badge = document.getElementById('activeBrokerBadge');
+            badge.innerText = b.toUpperCase() + " ACTIVE";
+
             if (b === 'angel') {
                 container.innerHTML = `
-                    <input type="text" id="brokerClientId" placeholder="Client Code (e.g. A12345)" class="bg-slate-50 dark:bg-slate-800 border rounded-xl p-1.5 text-xs">
-                    <input type="text" id="brokerApiKey" placeholder="SmartAPI Key" class="bg-slate-50 dark:bg-slate-800 border rounded-xl p-1.5 text-xs">
-                    <input type="password" id="brokerMpin" placeholder="MPIN" class="bg-slate-50 dark:bg-slate-800 border rounded-xl p-1.5 text-xs">
-                    <input type="text" id="brokerTotp" placeholder="TOTP Secret Key" class="bg-slate-50 dark:bg-slate-800 border rounded-xl p-1.5 text-xs">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Client Code (User ID):</label>
+                        <input type="text" id="brokerClientId" placeholder="e.g. A123456" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-100">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">SmartAPI Key:</label>
+                        <input type="text" id="brokerApiKey" placeholder="Enter SmartAPI Key" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-100">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Angel MPIN (PIN):</label>
+                        <input type="password" id="brokerMpin" maxlength="6" placeholder="Enter 4/6 Digit MPIN" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-100">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">TOTP Secret Key:</label>
+                        <input type="text" id="brokerTotp" placeholder="Google Auth Secret" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-100">
+                    </div>
                 `;
             } else {
                 container.innerHTML = `
-                    <input type="text" id="brokerClientId" placeholder="Client ID" class="bg-slate-50 dark:bg-slate-800 border rounded-xl p-1.5 text-xs">
-                    <input type="password" id="brokerAccessToken" placeholder="Access Token" class="bg-slate-50 dark:bg-slate-800 border rounded-xl p-1.5 text-xs">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">${b.toUpperCase()} Client ID:</label>
+                        <input type="text" id="brokerClientId" placeholder="Enter Client ID" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-100">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-300 mb-1">Access Token:</label>
+                        <input type="password" id="brokerAccessToken" placeholder="Enter Access Token" class="w-full text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-100">
+                    </div>
                 `;
             }
         }
 
-        async function saveBrokerDetailsToSheet() {
+        async function saveConfigToSheet() {
             if (!currentUser) return;
+            const bName = document.getElementById('brokerSelect').value;
             const payload = {
                 action: "save_config",
                 email: currentUser.email,
                 broker: {
-                    name: document.getElementById('brokerSelect').value,
+                    name: bName,
                     clientId: document.getElementById('brokerClientId') ? document.getElementById('brokerClientId').value : "",
                     apiKey: document.getElementById('brokerApiKey') ? document.getElementById('brokerApiKey').value : "",
                     mpin: document.getElementById('brokerMpin') ? document.getElementById('brokerMpin').value : "",
@@ -288,12 +512,25 @@
                     token: document.getElementById('brokerAccessToken') ? document.getElementById('brokerAccessToken').value : ""
                 },
                 config: {
+                    strategy: document.getElementById('algoStrategySelect').value,
                     target: document.getElementById('algoTargetSelect').value,
+                    maxMove: document.getElementById('algoMaxMoveInput').value,
+                    maxTrades: document.getElementById('algoTradeLimitInput').value,
                     riskPerTrade: document.getElementById('algoRiskPerTradeInput').value
                 }
             };
-            await fetch(GOOGLE_SHEET_API_URL, { method: "POST", body: JSON.stringify(payload) });
-            alert("Settings saved to Google Sheet!");
+            try {
+                await fetch(GOOGLE_SHEET_API_URL, { method: "POST", body: JSON.stringify(payload) });
+                const badge = document.getElementById('cloudSyncBadge');
+                badge.innerText = "Sheet Synced";
+                setTimeout(() => { badge.innerText = "Sheet Connected"; }, 2000);
+            } catch (err) {}
+            onAlgoConfigChange();
+        }
+
+        async function saveBrokerDetailsToSheet() {
+            await saveConfigToSheet();
+            alert("Broker settings saved to your Google Sheet database!");
         }
 
         function handleUserLogout() {
@@ -301,65 +538,83 @@
             location.reload();
         }
 
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+        }
+
         function onExecutionModeChange() {
             executionMode = document.getElementById('algoExecutionMode').value;
             const badge = document.getElementById('botStatusBadge');
-            badge.innerText = executionMode === 'real' ? "REAL LIVE TRADING" : "PAPER TRADING";
-            badge.className = executionMode === 'real' ? "text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800" : "text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800";
+            const pnlLabel = document.getElementById('pnlLabelText');
+            if (executionMode === 'real') {
+                alert("Switched to Real Live Trading.");
+                badge.innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span> REAL LIVE TRADING`;
+                badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border-emerald-300";
+                pnlLabel.innerText = "Real Net PnL";
+            } else {
+                badge.innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span> PAPER TRADING`;
+                badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border-amber-300";
+                pnlLabel.innerText = "Paper Net PnL";
+            }
         }
 
-        function switchStrategy(stratId, el) {
-            document.querySelectorAll('.strategy-view').forEach(e => e.classList.remove('active'));
-            document.querySelectorAll('.strat-btn').forEach(e => e.className = "strat-btn py-2.5 px-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600");
+        function switchStrategy(stratId, element) {
+            currentStrategy = stratId;
+            document.querySelectorAll('.strategy-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.strat-btn').forEach(btn => btn.className = "strat-btn py-2.5 px-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-400 border border-transparent transition-all");
             document.getElementById(stratId).classList.add('active');
-            el.className = "strat-btn py-2.5 px-2 rounded-lg text-xs sm:text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-300";
+            element.className = "strat-btn py-2.5 px-2 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-300 shadow-sm transition-all";
         }
 
-        function switchSegment(s) {
-            currentSegment = s;
-            document.getElementById('seg-fno').className = s === 'fno' ? "flex-1 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white dark:bg-slate-800 text-emerald-700 shadow-sm" : "flex-1 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600";
-            document.getElementById('seg-cash').className = s === 'cash' ? "flex-1 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white dark:bg-slate-800 text-emerald-700 shadow-sm" : "flex-1 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600";
-            renderData();
+        function switchSegment(seg) {
+            currentSegment = seg;
+            document.getElementById('seg-fno').className = seg === 'fno' ? "flex-1 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 shadow-sm" : "flex-1 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400";
+            document.getElementById('seg-cash').className = seg === 'cash' ? "flex-1 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white dark:bg-slate-800 text-cyan-700 dark:text-cyan-400 shadow-sm" : "flex-1 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400";
+            renderTables();
         }
 
-        function renderData() {
+        function onAlgoConfigChange() {
+            const targetVal = parseInt(document.getElementById('algoTargetSelect').value);
+            const bannerText = document.getElementById('trailingRuleText');
+            bannerText.innerHTML = `<b>Target 1:${targetVal}:</b> Half Book @ 1:2, Trail SL until 100% Full Exit @ 1:${targetVal}.`;
+        }
+
+        function renderTables() {
             if (!rawMarketData) return;
             document.getElementById('lastUpdated').innerText = rawMarketData.last_updated;
-            const d = rawMarketData[currentSegment] || {};
-            
-            // Gainers
-            document.getElementById('gainerBody').innerHTML = (d.gainers || []).map((s, i) => `
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 border-b">
-                    <td class="py-2 px-2">${i+1}</td>
-                    <td class="py-2 px-2 font-bold">${s.symbol}</td>
-                    <td class="py-2 px-2 font-semibold">₹${s.ltp}</td>
-                    <td class="py-2 px-2 text-emerald-600 font-bold">+${s.oiChange}%</td>
-                    <td class="py-2 px-2">${s.pChange}%</td>
-                    <td class="py-2 px-2 text-right font-bold text-emerald-600">${s.trend}</td>
-                </tr>
-            `).join('');
+            const data = rawMarketData[currentSegment] || {};
 
-            // Breakouts
-            document.getElementById('breakoutBody').innerHTML = (d.breakouts_5m || []).map((s, i) => `
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 border-b">
-                    <td class="py-2 px-2">${i+1}</td>
-                    <td class="py-2 px-2 font-bold">${s.symbol}</td>
-                    <td class="py-2 px-2">₹${s.ltp}</td>
-                    <td class="py-2 px-2 font-black text-amber-500">${s.vol_ratio}x</td>
-                    <td class="py-2 px-2 text-right font-bold text-emerald-600">${s.breakout_type}</td>
-                </tr>
-            `).join('');
+            const gainers = data.gainers || [];
+            document.getElementById('gainerBody').innerHTML = gainers.map((s, idx) => `
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <td class="py-2.5 px-2 text-slate-400 font-mono text-xs">${idx + 1}</td>
+                    <td class="py-2.5 px-2 font-bold">${s.symbol}</td>
+                    <td class="py-2.5 px-2 font-medium">₹${s.ltp}</td>
+                    <td class="py-2.5 px-2 font-bold text-emerald-600">+${s.oiChange}%</td>
+                    <td class="py-2.5 px-2 font-bold ${s.pChange >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${s.pChange}%</td>
+                    <td class="py-2.5 px-2 text-right font-bold text-emerald-600">${s.trend}</td>
+                </tr>`).join('');
+
+            const breakouts = data.breakouts_5m || [];
+            document.getElementById('breakoutBody').innerHTML = breakouts.map((s, idx) => `
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <td class="py-2.5 px-2 text-slate-400 font-mono text-xs">${idx + 1}</td>
+                    <td class="py-2.5 px-2 font-bold">${s.symbol}</td>
+                    <td class="py-2.5 px-2">₹${s.ltp}</td>
+                    <td class="py-2.5 px-2 font-black text-amber-500">${s.vol_ratio}x</td>
+                    <td class="py-2.5 px-2 text-right font-bold text-emerald-600">${s.breakout_type}</td>
+                </tr>`).join('');
         }
 
-        // 2-SECOND SUB-SECOND POLLING FROM CLOUD SERVER
+        // Live Continuous 2-Second Polling from Render
         async function fetchLiveFeed() {
             try {
                 const res = await fetch(LIVE_CLOUD_API_URL);
                 if (res.ok) {
                     rawMarketData = await res.json();
-                    renderData();
+                    renderTables();
                 }
-            } catch(e) {}
+            } catch (err) {}
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -367,13 +622,12 @@
             const saved = localStorage.getItem('active_algo_user');
             if (saved) {
                 currentUser = JSON.parse(saved);
-                document.getElementById('userEmailDisplay').innerText = currentUser.email;
+                applyUserCloudData(currentUser);
                 document.getElementById('authModal').classList.add('hidden');
                 document.getElementById('mainDashboardApp').classList.remove('opacity-0', 'pointer-events-none');
             }
-            setInterval(fetchLiveFeed, 2000); // 2-second continuous live poll
+            setInterval(fetchLiveFeed, 2000);
         });
     </script>
 </body>
 </html>
-
